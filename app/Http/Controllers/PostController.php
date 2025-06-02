@@ -16,6 +16,47 @@ class PostController extends Controller
         $this->postRepository = $postRepository;
     }
 
+    public function fetchAllPost()
+    {
+        try {
+
+            return $this->postRepository->fetchAllPost();
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function fetchPostByPostID($postID)
+    {
+        try {
+
+            if(!$postID) {
+                return response()->json(['message'=> 'Post not found'], 404);
+            }
+
+            return $this->postRepository->fetchPostByPostID($postID);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+        public function fetchPostByUserID($userID)
+    {
+        try {
+
+            if(!$userID) {
+                return response()->json(['message'=> 'User not found'], 404);
+            }
+
+            return $this->postRepository->fetchPostByUserID($userID);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function createPost(Request $request)
     {
         try {
@@ -60,7 +101,6 @@ class PostController extends Controller
 
             $this->postRepository->createPost($validatedPostReq);
             return response()->json(['message' => 'Post created successfully'], 201);
-
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 422);
         } catch (\Exception $e) {

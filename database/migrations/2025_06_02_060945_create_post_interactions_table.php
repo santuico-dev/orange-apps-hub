@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('post', function (Blueprint $table) {
+        Schema::create('post_interactions', function (Blueprint $table) {
             $table->id();
-            $table->text('post_content');
-            $table->string('post_media_path');
-            $table->enum('media_type', ['image', 'video'])->nullable();
-            $table->unsignedBigInteger('post_like_count')->default(0);
-            $table->unsignedBigInteger('post_comment_count')->default(0);
-            $table->datetime('post_created_at');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('post_id')->constrained('post')->onDelete('cascade');
+            $table->string('interaction_type');
+            $table->datetime('interaction_created_at');
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_post');
+        Schema::dropIfExists('post_interactions');
     }
 };

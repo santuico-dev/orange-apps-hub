@@ -10,9 +10,4 @@ class PostInteractionRepository implements PostInteractionInterface {
     {
         return PostInteraction::create($commentData);
     }
-
-    public function likePost($postID, $userID)
-    {
-        return null;
-    }
 }

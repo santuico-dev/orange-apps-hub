@@ -10,7 +10,7 @@ class PostRepository implements PostInterface
 
     public function fetchAllPost()
     {
-        return null;
+        return Post::all();
     }
 
     public function fetchPostByUserID($userID): ?Post

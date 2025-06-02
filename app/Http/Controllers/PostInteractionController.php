@@ -31,8 +31,8 @@ class PostInteractionController extends Controller
                 ]
             );
 
-            if (!$request->post_id) {
-                return response()->json(['message' => 'Post ID is not found'], 404);
+            if (!$this->postRepository->fetchPostByPostID($request->post_id)) {
+                return response()->json(['message' => 'Post not found'], 404);
             }
 
             //merging array so I can include the userID, postID, and comment date
@@ -58,9 +58,14 @@ class PostInteractionController extends Controller
         }
     }
 
-    public function likePost($postID, $userID)
+    public function likePost($postID)
     {
         try {
+
+            //update like count of the post
+            $this->postRepository->updatePost($postID, [
+                'post_like_count' => $this->postRepository->fetchPostByPostID($postID)->post_like_count + 1
+            ]);
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 400);
         } catch (\Exception $e) {

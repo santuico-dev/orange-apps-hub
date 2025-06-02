@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostInteractionController;
+use App\Http\Controllers\UserInteractionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,11 +32,27 @@ Route::middleware('throttle:api')->controller(AuthController::class)->group(func
 Route::middleware(['auth:api', 'throttle:api'])->group(function () {
 
     Route::controller(PostController::class)->group(function () {
+
+        Route::get('/fetchAllPost', 'fetchAllPost');
+        Route::get('/fetchPostByPostID/{postID}', 'fetchPostByPostID');
+        Route::get('/fetchPostByUserID/{userID}', 'fetchPostByUserID');
+
         Route::post('/createPost', 'createPost');
     });
 
+    //INTERACTIONS
     Route::controller(PostInteractionController::class)->group(function () {
         Route::post('/createPostComment', 'createPostComment');
         Route::patch('/likePost/{postID}', 'likePost');
+    });
+
+    Route::controller(UserInteractionController::class)->group(function () {
+
+        Route::get('/fetchMyFriendRequests/{userID}', 'fetchMyFriendRequests');
+
+        Route::post('/createFriendRequest', 'createFriendRequest');
+
+        Route::patch('/acceptFriendRequest', 'acceptFriendRequest');
+        Route::patch('/rejectFriendRequest', 'rejectFriendRequest');
     });
 });

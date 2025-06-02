@@ -9,7 +9,7 @@ class PostInteraction extends Model
 {
     use HasFactory;
 
-    protected $table = 'user_comments';
+    protected $table = 'comments';
 
     protected $fillable = [
       'post_id',
