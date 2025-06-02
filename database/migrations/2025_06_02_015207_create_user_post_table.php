@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('user_post', function (Blueprint $table) {
             $table->id();
-            $table->string('post_caption');
-            $table->string('post_media');
-            $table->integer('post_like_count');
-            $table->integer('post_comment_count');
+            $table->text('post_content');
+            $table->string('post_media_path');
+            $table->enum('media_type', ['image', 'video'])->nullable();
+            $table->unsignedBigInteger('post_like_count')->default(0);
+            $table->unsignedBigInteger('post_comment_count')->default(0);
             $table->datetime('post_created_at');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
