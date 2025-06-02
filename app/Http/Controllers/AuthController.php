@@ -97,6 +97,10 @@ class AuthController extends Controller
             $userByEmail = $this->userRepository->findUserByEmail($validatedRegistrationReq['email']);
             $userByPhoneNumber = $this->userRepository->findUserByPhoneNumber($validatedRegistrationReq['mobile_number']);
 
+            $validatedRegistrationReq = array_merge($validatedRegistrationReq, [
+                'user_profile_image' => 'uploads/posts/Bmn18pvzTvIqFYa2H9SozKmhDsrQy3AbTvcGLFop.jpg'
+            ]);
+
             //guards
             if($userByEmail || $userByPhoneNumber) {
                 return response()->json(['message' => 'Account with the same email or mobile number already exists'], 409);

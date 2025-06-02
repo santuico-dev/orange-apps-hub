@@ -13,7 +13,9 @@
 
                             <!-- FORM -->
                             <div class="col-md-6 p-5">
-                                <form>
+                                <form id="login-form">
+                                    @csrf
+
                                     <h1 class="text-center mb-4" style="font-family: 'Kanit', sans-serif; font-weight: 700;">
                                         LOGIN
                                     </h1>
@@ -33,7 +35,8 @@
                                         <div class="input-group">
                                             <input type="password" class="form-control" id="password"
                                                 placeholder="Enter password">
-                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" onclick="togglePass()">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword"
+                                                onclick="togglePass()">
                                                 <i class="bi bi-eye" id="eyeIcon"></i>
                                             </button>
                                         </div>
@@ -67,6 +70,62 @@
             </div>
         </div>
     </div>
+
+    {{-- JQUERY --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    {{-- ALERT --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- LOGIN FUNCTION --}}
+    <script>
+        $('#login-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const email = $('#email').val();
+            const password = $('#password').val();
+
+            $.ajax({
+                url: 'api/login',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                data: {
+                    email: email,
+                    password: password
+                },
+                success: function(response) {
+
+                    //saving to local storage
+                    localStorage.setItem('token', response.token);
+                    window.location.href = '/newsfeed';
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.message;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: `${Object.values(errors).join('\n')}`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: `${xhr.responseJSON.message || 'An error occurred'}`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
     <script src="{{ asset('js/utils/togglePasswordVisibility.js') }}"></script>
 
 @endsection

@@ -30,7 +30,7 @@ class PostController extends Controller
     {
         try {
 
-            if(!$postID) {
+            if(!$this->postRepository->fetchPostByPostID($postID)) {
                 return response()->json(['message'=> 'Post not found'], 404);
             }
 
@@ -45,7 +45,7 @@ class PostController extends Controller
     {
         try {
 
-            if(!$userID) {
+            if(!$this->postRepository->fetchPostByUserID($userID)) {
                 return response()->json(['message'=> 'User not found'], 404);
             }
 
