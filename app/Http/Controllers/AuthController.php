@@ -112,4 +112,9 @@ class AuthController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+    public function logout() {
+
+        auth()->logout();
+    }
 }
