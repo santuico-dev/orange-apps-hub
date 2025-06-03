@@ -252,30 +252,7 @@
                             <!-- Posts Container -->
                             <div id="postsContainer">
                                 <div class="post-card mb-4" data-post-id="1">
-                                    <!-- Post Actions -->
-                                    <div class="post-actions px-3 py-2">
-                                        <div class="d-flex justify-content-around">
-                                            <button
-                                                class="action-btn flex-fill d-flex align-items-center justify-content-center"
-                                                onclick="toggleLike(1)">
-                                                <i class="far fa-thumbs-up me-2" id="like-icon-1"></i>
-                                                <span id="like-text-1">Like</span>
-                                            </button>
-                                            <button
-                                                class="action-btn flex-fill d-flex align-items-center justify-content-center"
-                                                onclick="toggleComments(1)">
-                                                <i class="far fa-comment me-2"></i>
-                                                Comment
-                                            </button>
-                                            <button
-                                                class="action-btn flex-fill d-flex align-items-center justify-content-center">
-                                                <i class="far fa-share me-2"></i>
-                                                Share
-                                            </button>
-                                        </div>
-                                        <div id="commentSectionContainer">
-
-                                        </div>
+                                    <div id="commentSectionContainer">
                                     </div>
                                 </div>
                             </div>
@@ -283,6 +260,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
         {{-- MODAL --}}
@@ -539,7 +517,7 @@
         {{-- SESSION CHECKER --}}
         <script src="{{ asset('js/utils/session.js') }}"></script>
 
-        {{-- FETCHING OF POST --}}
+        {{-- FETCHING OF POST & OTHER FUNCTIONALITY --}}
         <script>
             $(document).ready(function() {
                 fetchPosts();
@@ -579,9 +557,9 @@
                                                 ? `<img src="/storage/${post.post_media_path}" alt="Post Media" class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;" />`
                                                 : post.media_type === 'video' && post.post_media_path
                                                 ? `<video controls class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;">
-                                                                                                    <source src="/storage/${post.post_media_path}" type="video/mp4">
-                                                                                                    Your browser does not support the video tag.
-                                                                                            </video>`
+                                                                    <source src="/storage/${post.post_media_path}" type="video/mp4">
+                                                                    Your browser does not support the video tag.
+                                                                   </video>`
                                                 : ''
                                             }
                                         </div>
@@ -597,14 +575,11 @@
                                                 <button class="action-btn flex-fill d-flex align-items-center justify-content-center" onclick="toggleComments(${post.id})">
                                                     <i class="far fa-comment me-2"></i> Comment
                                                 </button>
-                                                <button class="action-btn flex-fill d-flex align-items-center justify-content-center">
-                                                    <i class="fas fa-share-alt me-2"></i> Share
-                                                </button>
                                             </div>
                                         </div>
 
                                         <!-- Like Count -->
-                                        <div class="px-3 py-2" id="like-count-${post.id}" style="display: none;">
+                                        <div class="px-3 py-2" id="like-count-${post.id}">
                                             <small class="text-muted"><span id="like-number-${post.id}">${post.post_like_count}</span> people like this</small>
                                         </div>
 
@@ -702,6 +677,40 @@
                 commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
 
                 fetchComments(postId);
+            }
+
+            //function to like the post
+            function toggleLike(postId) {
+                $.ajax({
+                    url: `/api/likePost/${postId}`,
+                    type: 'PATCH',
+                    headers: {
+                        'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
+                        const icon = $(`#like-icon-${postId}`);
+                        const likeText = $(`#like-text-${postId}`);
+                        const likeCount = $(`#like-number-${postId}`);
+
+                        if (response.liked) {
+                            icon.removeClass('far').addClass('fas');
+                            likeText.text('Liked');
+                            icon.css('color', 'orange');
+                            likeCount.text(parseInt(likeCount.text()) + 1);
+                        } else {
+                            icon.removeClass('fas').addClass('far');
+                            likeText.text('Like');
+                            icon.css('color', 'black');
+                            likeCount.text(parseInt(likeCount.text()) - 1);
+                        }
+
+                        $(`#like-count-${postId}`).show();
+                    },
+                    error: function() {
+                        alert('Something went wrong on our end, try again.');
+                    }
+                });
             }
 
             //function to submit comment

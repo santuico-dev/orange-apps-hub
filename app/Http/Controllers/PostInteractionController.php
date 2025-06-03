@@ -34,7 +34,8 @@ class PostInteractionController extends Controller
                 ]
             );
 
-            if (!$this->postRepository->fetchPostByPostID($validatedPostCommentReq['post_id'])) {
+            $isPostExisting = $this->postRepository->fetchPostByPostID($validatedPostCommentReq['post_id']);
+            if (!$isPostExisting) {
                 return response()->json(['message' => 'Post not found'], 404);
             }
 
@@ -47,7 +48,7 @@ class PostInteractionController extends Controller
             //create comment
             $this->postInteractionRepository->createPostComment($validatedPostCommentReq);
 
-            //update the post comment attributes like the comment count
+            //update the post attributes like the comment count
             $this->postRepository->updatePost($request->post_id, [
                 'post_comment_count' => $this->postRepository->fetchPostByPostID($request->post_id)->post_comment_count + 1
             ]);
@@ -60,7 +61,8 @@ class PostInteractionController extends Controller
         }
     }
 
-    public function fetchPostCommentsByPostID($postID){
+    public function fetchPostCommentsByPostID($postID)
+    {
         try {
             return $this->postInteractionRepository->fetchPostCommentsByPostID($postID);
         } catch (\Exception $e) {
@@ -72,10 +74,29 @@ class PostInteractionController extends Controller
     {
         try {
 
-            //update like count of the post
-            $this->postRepository->updatePost($postID, [
-                'post_like_count' => $this->postRepository->fetchPostByPostID($postID)->post_like_count + 1
-            ]);
+            //guards
+            $post = $this->postRepository->fetchPostByPostID($postID);
+
+            if (!$post) {
+                return response()->json(['message' => 'Post not found'], 404);
+            }
+
+            $isUserLikedPost = $this->postInteractionRepository->togglePostLike($postID, auth()->user()->id);
+
+            //update post attirbutes for likes
+            if ($isUserLikedPost) {
+                //increment the like count if the user liked the post
+                $this->postRepository->updatePost($postID, [
+                    'post_like_count' => $post->post_like_count + 1
+                ]);
+            } else {
+                //decrement the like count if the user unliked the post
+                $this->postRepository->updatePost($postID, [
+                    'post_like_count' => $post->post_like_count - 1
+                ]);
+            }
+
+            return response()->json(['liked' => $isUserLikedPost], 200);
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 400);
         } catch (\Exception $e) {

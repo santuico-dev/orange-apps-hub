@@ -13,12 +13,14 @@ class PostRepository implements PostInterface
     {
         return Post::join('users', 'users.id', '=', 'post.user_id')
             ->select(
-                'post.*',
+                'post.id',
+                'post.post_content',
+                'post.post_media_path',
+                'post.post_like_count',
+                'post.post_comment_count',
+                'post.post_created_at',
+                'users.id as user_id',
                 DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_full_name"),
-                'users.email as user_email',
-                'users.mobile_number as user_mobile_number',
-                'users.gender as user_gender',
-                'users.birth_date as user_birth_date',
                 'users.user_profile_image as user_profile_image'
             )
             ->orderBy('post.created_at', 'desc')

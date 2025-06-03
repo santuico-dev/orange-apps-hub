@@ -72,4 +72,9 @@ class User extends Authenticatable implements JWTSubject
             'user_profle_image' => $this->user_profile_image
         ];
     }
+
+    public function likedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'post_likes');
+    }
 }
