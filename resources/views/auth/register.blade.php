@@ -24,6 +24,9 @@
                                         style="font-family: 'Kanit', sans-serif; font-weight: 700;">
                                         SIGNUP
                                     </h1>
+                                    <p class="text-center mb-4 text-secondary small" style="font-family: 'Kanit', sans-serif;">
+                                        Create your account to get started.
+                                    </p>
 
                                     <!-- First Row: First Name & Last Name -->
                                     <div class="row mb-3">

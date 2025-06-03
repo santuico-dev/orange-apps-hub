@@ -28,3 +28,12 @@ Route::get('/signup', function () {
 Route::get('/newsfeed', function () {
     return view('user.newsfeed');
 });
+
+Route::get('/friends', function () {
+    return view('user.friendslist');
+});
+
+Route::get('/friend-request', function () {
+    return view('user.friendrequest');
+});
+

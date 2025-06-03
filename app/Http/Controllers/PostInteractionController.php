@@ -24,21 +24,23 @@ class PostInteractionController extends Controller
         try {
             $validatedPostCommentReq = $request->validate(
                 [
+                    'post_id' => 'required|integer',
                     'comment_content' => 'required|string',
                 ],
                 [
+                    'post_id.required' => 'Post ID is required.',
+                    'post_id.integer' => 'Post ID must be an integer.',
                     'comment_content.required' => 'Comment content is required.',
                 ]
             );
 
-            if (!$this->postRepository->fetchPostByPostID($request->post_id)) {
+            if (!$this->postRepository->fetchPostByPostID($validatedPostCommentReq['post_id'])) {
                 return response()->json(['message' => 'Post not found'], 404);
             }
 
             //merging array so I can include the userID, postID, and comment date
             $validatedPostCommentReq = array_merge($validatedPostCommentReq, [
                 'user_id' => auth()->user()->id,
-                'post_id' => $request->post_id,
                 'comment_created_at' => Carbon::now()
             ]);
 
@@ -53,6 +55,14 @@ class PostInteractionController extends Controller
             return response()->json(['message' => 'Comment created successfully'], 201);
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 400);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function fetchPostCommentsByPostID($postID){
+        try {
+            return $this->postInteractionRepository->fetchPostCommentsByPostID($postID);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

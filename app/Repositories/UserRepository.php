@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Repositories\Interface\UserInterface;
+use Illuminate\Support\Facades\DB;
 
 class UserRepository implements UserInterface
 {
@@ -18,9 +19,14 @@ class UserRepository implements UserInterface
     {
         return User::find($userID);
     }
-    public function findUserByName($name): ?User
+    public function findUserByName($name)
     {
-        return User::where('first_name', $name)->first();
+        return DB::table('users')
+            ->select(
+                'users.id',
+            )
+            ->whereRaw("CONCAT(users.first_name, ' ', users.last_name) = ?", [$name])
+            ->first();
     }
 
     public function findUserByEmail($email): ?User

@@ -10,9 +10,15 @@ interface UserInteractionInterface
 
     public function fetchMyFriends($userID);
 
+    public function fetchFriendSuggestion($userID);
+
+    public function fetchPendingFriendRequests($userID);
+
+    public function fetchSentPendingFriendRequests($userID);
+
     public function createFriendRequest($requestData);
 
-    public function removeFriend($requestData);
+    public function removeFriend($friendID, $userID);
 
     public function acceptFriendRequest($requestData);
 

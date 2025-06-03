@@ -17,7 +17,7 @@
                                     @csrf
 
                                     <h1 class="text-center mb-4" style="font-family: 'Kanit', sans-serif; font-weight: 700;">
-                                        LOGIN
+                                        SociaHub
                                     </h1>
 
                                     <div class="mb-3">

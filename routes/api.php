@@ -28,9 +28,9 @@ Route::middleware('throttle:api')->controller(AuthController::class)->group(func
     Route::post('/signup', 'signup');
 });
 
-//POST
 Route::middleware(['auth:api', 'throttle:api'])->group(function () {
 
+    //POST
     Route::controller(PostController::class)->group(function () {
 
         Route::get('/fetchAllPost', 'fetchAllPost');
@@ -42,17 +42,28 @@ Route::middleware(['auth:api', 'throttle:api'])->group(function () {
 
     //INTERACTIONS
     Route::controller(PostInteractionController::class)->group(function () {
+
+        Route::get('/fetchPostCommentsByPostID/{postID}', 'fetchPostCommentsByPostID');
+
         Route::post('/createPostComment', 'createPostComment');
         Route::patch('/likePost/{postID}', 'likePost');
     });
 
     Route::controller(UserInteractionController::class)->group(function () {
 
-        Route::get('/fetchMyFriendRequests/{userID}', 'fetchMyFriendRequests');
+        Route::get('/fetchMyFriendRequests', 'fetchMyFriendRequests');
+        Route::get('/fetchMyFriends', 'fetchMyFriends');
+        Route::get('/fetchFriendSuggestion', 'fetchFriendSuggestion');
+        Route::get('/fetchPendingFriendRequests', 'fetchPendingFriendRequests');
+        Route::get('/fetchSentPendingFriendRequests', 'fetchSentPendingFriendRequests');
+
+        Route::get('/findUserByName/{name}', 'fetchUserByName');
 
         Route::post('/createFriendRequest', 'createFriendRequest');
 
-        Route::patch('/acceptFriendRequest', 'acceptFriendRequest');
-        Route::patch('/rejectFriendRequest', 'rejectFriendRequest');
+        Route::post('/acceptFriendRequest', 'acceptFriendRequest');
+        Route::post('/rejectFriendRequest', 'rejectFriendRequest');
+
+        Route::delete('/removeFriend/{friendID}', 'removeFriend');
     });
 });

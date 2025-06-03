@@ -238,17 +238,7 @@
                                 </div>
 
                                 <!-- LEFT SIDE MENU -->
-                                <div class="menu-options">
-                                    <button class="menu-item" onclick="navigateToFriends()">
-                                        <i class="fas fa-users"></i>
-                                        Friends
-                                    </button>
-                                    <hr class="mx-3 my-2">
-                                    <button class="menu-item text-danger" onclick="logout()">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        Logout
-                                    </button>
-                                </div>
+                                @include('components.sidenav')
                             </div>
                         </div>
 
@@ -262,21 +252,6 @@
                             <!-- Posts Container -->
                             <div id="postsContainer">
                                 <div class="post-card mb-4" data-post-id="1">
-                                    <div class="p-3">
-                                        <!-- Post Header -->
-                                        <div class="d-flex align-items-center mb-3">
-                                            <img src="https://via.placeholder.com/40" alt="Profile"
-                                                class="profile-img me-3">
-                                            <div>
-                                                <h6 class="mb-0 fw-bold"></h6>
-                                                <small class="text-muted"></small>
-                                            </div>
-                                        </div>
-
-                                        <!-- Post Content -->
-                                        <p class="mb-3"></p>
-                                    </div>
-
                                     <!-- Post Actions -->
                                     <div class="post-actions px-3 py-2">
                                         <div class="d-flex justify-content-around">
@@ -297,6 +272,9 @@
                                                 <i class="far fa-share me-2"></i>
                                                 Share
                                             </button>
+                                        </div>
+                                        <div id="commentSectionContainer">
+
                                         </div>
                                     </div>
                                 </div>
@@ -347,7 +325,7 @@
                             onclick="document.getElementById('fileInput').click()">
                             <div>
                                 <i class="fas fa-camera fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted">Upload/Add photos</h5>
+                                <h5 class="text-muted">Upload photos/videos</h5>
                                 <p class="text-muted">or drag and drop</p>
                             </div>
                             <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;"
@@ -559,38 +537,7 @@
         </script>
 
         {{-- SESSION CHECKER --}}
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                try {
-
-                    const sessionToken = sessionStorage.getItem('token');
-                    if (!sessionToken) {
-                        window.location.href = '/';
-                        return;
-                    }
-
-                    //this decodes the jwt returned from BE and check if its expired or valid
-                    const decodedToken = jwt_decode(sessionToken);
-                    const currTime = Date.now() / 1000;
-
-                    if (decodedToken.exp < currTime) {
-                        sessionStorage.removeItem('token');
-                        window.location.href = '/';
-                        return;
-                    }
-
-                    //if there is session set the curr user information
-                    $('.profile-name').text(decodedToken.first_name + ' ' + decodedToken.last_name);
-                    $('.profile-image').attr('src', `/storage/${decodedToken.user_profle_image}`);
-                    $('.post-text-input').attr('placeholder', `What's on your mind, ${decodedToken.first_name}?`);
-
-                } catch (err) {
-                    console.error('Invalid token');
-                    sessionStorage.removeItem('token');
-                    window.location.href = '/';
-                }
-            })
-        </script>
+        <script src="{{ asset('js/utils/session.js') }}"></script>
 
         {{-- FETCHING OF POST --}}
         <script>
@@ -632,9 +579,9 @@
                                                 ? `<img src="/storage/${post.post_media_path}" alt="Post Media" class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;" />`
                                                 : post.media_type === 'video' && post.post_media_path
                                                 ? `<video controls class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;">
-                                                    <source src="/storage/${post.post_media_path}" type="video/mp4">
-                                                    Your browser does not support the video tag.
-                                            </video>`
+                                                                                                    <source src="/storage/${post.post_media_path}" type="video/mp4">
+                                                                                                    Your browser does not support the video tag.
+                                                                                            </video>`
                                                 : ''
                                             }
                                         </div>
@@ -651,7 +598,7 @@
                                                     <i class="far fa-comment me-2"></i> Comment
                                                 </button>
                                                 <button class="action-btn flex-fill d-flex align-items-center justify-content-center">
-                                                    <i class="far fa-share me-2"></i> Share
+                                                    <i class="fas fa-share-alt me-2"></i> Share
                                                 </button>
                                             </div>
                                         </div>
@@ -663,14 +610,21 @@
 
                                         <!-- Comments Section -->
                                         <div class="comments-section px-3 pb-3" id="comments-${post.id}" style="display: none;">
-                                            <div class="comments-list mb-3" id="comments-list-${post.id}"></div>
-                                            <div class="d-flex align-items-center">
-                                                <img src="https://via.placeholder.com/32" alt="Profile" class="profile-img me-2" style="width: 32px; height: 32px;">
-                                                <input type="text" class="form-control comment-input" placeholder="Write a comment..." id="comment-input-${post.id}" onkeypress="handleCommentKeypress(event, ${post.id})">
+                                                <div class="comments-list mb-3" id="comments-list-${post.id}">
+                                                    <!-- Existing comments will be appended here -->
+                                                </div>
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <img src="/storage/${post.user_profile_image}" alt="Profile" class="profile-img" style="width: 32px; height: 32px;">
+                                                    <div class="flex-grow-1">
+                                                        <textarea class="form-control comment-input" placeholder="Write a comment..." rows="2" id="comment-input-${post.id}"></textarea>
+                                                        <div class="d-flex justify-content-end mt-2">
+                                                            <button class="btn btn-sm" onclick="submitComment(${post.id})" style="background: linear-gradient(135deg, #ffa500, #ff7f50); color: #fff; font-family: Kanit, sans-serif; font-weight: 500;">Post Comment</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
 
+                                    </div>
                                     `;
                             $('#postsContainer').append(postHtml);
                         });
@@ -703,10 +657,90 @@
                 if (interval >= 1) return interval + " minute" + (interval > 1 ? "s" : "") + " ago";
                 return Math.floor(seconds) + " seconds ago";
             }
+
+            //function to fetch comment
+            function fetchComments(postId) {
+                $.ajax({
+                    url: `/api/fetchPostCommentsByPostID/${postId}`,
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(comments) {
+                        const commentContainer = $(`#comments-list-${postId}`);
+                        commentContainer.empty();
+
+                        if (comments.length === 0) {
+                            commentContainer.html('<p class="text-muted">No comments yet.</p>');
+                            return;
+                        }
+
+                        comments.forEach(function(comment) {
+                            const commentHtml = `
+                            <div class="d-flex align-items-start mb-3">
+                                <img src="/storage/${comment.user_profile_image}" alt="Profile" class="rounded-circle me-2" style="width: 36px; height: 36px; object-fit: cover;">
+                                <div class="bg-light p-2 rounded" style="max-width: 100%;">
+                                    <div class="fw-semibold" style="font-size: 0.95rem;">${comment.user_full_name}</div>
+                                    <div style="font-size: 0.875rem;">${comment.comment_content}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">${timeAgo(comment.comment_date)}</div>
+                                </div>
+                            </div>
+                        `;
+                            commentContainer.append(commentHtml);
+                        });
+                    },
+                    error: function() {
+                        $(`#comments-list-${postId}`).html('<p class="text-danger">Failed to load comments.</p>');
+                    }
+                });
+            }
+
+            //function for toggling the visibility of the comment section
+            function toggleComments(postId) {
+                const commentSection = document.getElementById(`comments-${postId}`);
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+
+                fetchComments(postId);
+            }
+
+            //function to submit comment
+            function submitComment(postId) {
+
+                const input = document.getElementById(`comment-input-${postId}`);
+                const content = input.value.trim(); //getting the value of the comment
+
+                //no content found
+                if (content === '') return;
+
+                $.ajax({
+                    url: `/api/createPostComment`,
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                        'Accept': 'application/json'
+                    },
+                    data: {
+                        post_id: postId,
+                        comment_content: content
+                    },
+                    success: function(response) {
+
+                        //load comments again after commenting
+                        fetchComments(postId);
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to post comment, try again.',
+                            text: 'You have registered successfully.',
+                            confirmButtonColor: '#ffa500'
+                        })
+                    }
+                });
+            }
         </script>
     </body>
-
-
     </div>
 
 @endsection
