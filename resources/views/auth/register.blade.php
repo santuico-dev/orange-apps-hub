@@ -6,66 +6,80 @@
     <div class="d-flex justify-content-center align-items-center min-vh-100">
         <div class="container-fluid">
             <div class="row justify-content-center">
-                <div class="col-lg-8 col-xl-6">
+                <div class="col-lg-10 col-xl-8">
                     <div class="bg-white shadow-lg rounded-4 overflow-hidden">
                         <div class="row g-0">
 
                             <!-- IMAGE -->
-                            <div class="col-md-6 d-flex align-items-center justify-content-center position-relative"
+                            <div class="col-md-5 d-flex align-items-center justify-content-center position-relative"
                                 style="background: linear-gradient(135deg, #ffa500, #ff7f50);">
                                 <img src="{{ asset('images/auth-image.png') }}" alt="Login Image"
                                     class="w-100 h-100 object-fit-cover" style="border-radius: 0;">
                             </div>
 
                             <!-- REGISTER FORM -->
-                            <div class="col-md-6 p-5">
+                            <div class="col-md-7 p-4">
                                 <form id="signupForm">
                                     <h1 class="text-center mb-4"
                                         style="font-family: 'Kanit', sans-serif; font-weight: 700;">
                                         SIGNUP
                                     </h1>
 
-                                    <div class="mb-3">
-                                        <label for="first_name" class="form-label">First Name</label>
-                                        <input type="text" class="form-control py-2" id="first_name" placeholder="Juan">
+                                    <!-- First Row: First Name & Last Name -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="first_name" class="form-label"
+                                                style="font-family: Kanit, sans-serif">First Name</label>
+                                            <input type="text" class="form-control py-2" id="first_name"
+                                                placeholder="Juan">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="last_name" class="form-label"
+                                                style="font-family: Kanit, sans-serif">Last Name</label>
+                                            <input type="text" class="form-control py-2" id="last_name"
+                                                placeholder="Dela Cruz">
+                                        </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="last_name" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control py-2" id="last_name"
-                                            placeholder="Dela Cruz">
+                                    <!-- Second Row: Gender & Birthdate -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="gender" class="form-label"
+                                                style="font-family: Kanit, sans-serif">Gender</label>
+                                            <select class="form-select py-2" id="gender">
+                                                <option value="" selected disabled>Select gender</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="birthdate" class="form-label"
+                                                style="font-family: Kanit, sans-serif">Birthdate</label>
+                                            <input type="date" class="form-control py-2" id="birthdate">
+                                        </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="gender" class="form-label">Gender</label>
-                                        <select class="form-select py-2" id="gender">
-                                            <option value="" selected disabled>Select gender</option>
-                                            <option value="male">Male</option>
-                                            <option value="female">Female</option>
-                                            <option value="other">Other</option>
-                                        </select>
+                                    <!-- Third Row: Mobile & Email -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="mobile" class="form-label"
+                                                style="font-family: Kanit, sans-serif">Mobile Number</label>
+                                            <input type="text" class="form-control py-2" id="mobile"
+                                                placeholder="09XXXXXXXXX">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label"
+                                                style="font-family: Kanit, sans-serif">Email</label>
+                                            <input type="email" class="form-control py-2" id="email"
+                                                placeholder="sample@gmail.com">
+                                        </div>
                                     </div>
 
-
-                                    <div class="mb-3">
-                                        <label for="birthdate" class="form-label">Birthdate</label>
-                                        <input type="date" class="form-control py-2" id="birthdate">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="mobile" class="form-label">Mobile Number</label>
-                                        <input type="text" class="form-control py-2" id="mobile"
-                                            placeholder="09XXXXXXXXX">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control py-2" id="email"
-                                            placeholder="sample@gmail.com">
-                                    </div>
-
+                                    <!-- Password (Full Width) -->
                                     <div class="mb-4">
-                                        <label for="password" class="form-label">Password</label>
+                                        <label for="password" class="form-label"
+                                            style="font-family: Kanit, sans-serif">Password</label>
                                         <div class="input-group">
                                             <input type="password" class="form-control" id="password"
                                                 placeholder="Enter password">
@@ -75,10 +89,19 @@
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="btn w-100 py-2 mb-4"
-                                        style="background: linear-gradient(135deg, #ffa500, #ff7f50); color: #fff;">
+                                    <button type="submit" class="btn w-100 py-2 mb-3"
+                                        style="background: linear-gradient(135deg, #ffa500, #ff7f50); color: #fff; font-family: Kanit, sans-serif; font-weight: 500;">
                                         Signup
                                     </button>
+
+                                    <hr class="my-3">
+
+                                    <p class="text-center mb-0" style="font-family: 'Kanit', sans-serif;">
+                                        Already have an account?
+                                        <a href="/" class="text-decoration-none fw-semibold" style="color: #dd630a;">
+                                            Login
+                                        </a>
+                                    </p>
                                 </form>
 
                             </div>
@@ -95,6 +118,7 @@
     {{-- ALERT --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    {{-- SIGNUP FUNCTION --}}
     <script>
         $('#signupForm').on('submit', function(e) {
             e.preventDefault();
@@ -121,12 +145,15 @@
                         text: 'You have registered successfully.',
                         confirmButtonColor: '#ffa500'
                     }).then(() => {
+
+                        //saving token to session storage
+                        sessionStorage.setItem('token', response.token);
                         window.location.href = '/newsfeed';
                     });
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
-                        let errors = xhr.responseJSON.errors;
+                        let errors = xhr.responseJSON.message;
                         Swal.fire({
                             icon: 'error',
                             title: 'Validation Error',

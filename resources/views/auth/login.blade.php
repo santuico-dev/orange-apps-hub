@@ -77,6 +77,33 @@
     {{-- ALERT --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    {{-- JWT DECODE --}}
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
+    {{-- SESSION CHECKER --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+
+                const sessionToken = sessionStorage.getItem('token');
+                const decodedSessionToken = jwt_decode(sessionToken);
+                const isTokenExpired = decodedSessionToken.exp < Date.now() / 1000;
+
+                //checks if there is a session token and if it is a valid JWT token and not expired
+                if (!sessionToken || isTokenExpired) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                window.location.href = '/newsfeed';
+
+            } catch (err) {
+                console.error(err);
+                sessionStorage.removeItem('token');
+            }
+        })
+    </script>
+
     {{-- LOGIN FUNCTION --}}
     <script>
         $('#login-form').on('submit', function(e) {
@@ -99,7 +126,7 @@
                 success: function(response) {
 
                     //saving to local storage
-                    localStorage.setItem('token', response.token);
+                    sessionStorage.setItem('token', response.token);
                     window.location.href = '/newsfeed';
                 },
                 error: function(xhr) {
