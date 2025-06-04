@@ -4,7 +4,7 @@
 
 @section('page-content')
     <div class="d-flex justify-content-center align-items-center min-vh-100">
-        <div class="container-fluid">
+        <div class="container-fluid" data-aos="fade-up">
             <div class="row justify-content-center">
                 <div class="col-lg-10 col-xl-8">
                     <div class="bg-white shadow-lg rounded-4 overflow-hidden">

@@ -55,30 +55,38 @@ class UserInteractionController extends Controller
             //friend request to => receiver
             $validatedFriendReq = $request->validate(
                 [
+                    'receiver_id' => 'required|integer',
                     'receiver_full_name' => 'required|string',
                 ],
                 [
+                    'receiver_id.required' => 'Receiver ID is required.',
                     'receiver_full_name.required' => 'Receiver full name is required.',
+                    'receiver_full_name.string' => 'Receiver full name must be a string.',
                 ]
             );
 
-            $receiverID = $this->userRepository->findUserByName($validatedFriendReq['receiver_full_name']);
-
-            //adding the value of the curr date
-            $validatedFriendReq = array_merge($validatedFriendReq, [
-                'friend_request_created_at' => Carbon::now(),
-                'friend_request_from' => auth()->user()->id,
-                'friend_request_to' => $receiverID->id
-            ]);
-
             //guards
-            if (!$this->userRepository->findUserByID($receiverID->id) || !$receiverID->id) {
+            $isUserExisting = $this->userRepository->findUserByID($validatedFriendReq['receiver_id']);
+            $isSameUser = $validatedFriendReq['receiver_id'] == auth()->user()->id;
+
+            if (!$isUserExisting) {
                 return response()->json(['message' => 'User does not exist'], 404);
             }
 
+            if($isSameUser) {
+                return response()->json(['message' => 'You cannot send a friend request to yourself'], 400);
+            }
+            //adding the value of the curr date
+            $validatedFriendReq = array_merge($validatedFriendReq, [
+                'friend_request_created_at' => Carbon::now()->toDateString(),
+                'friend_request_from' => auth()->user()->id,
+                'friend_request_to' => $validatedFriendReq['receiver_id'],
+            ]);
+
             //send req
-            $this->userInteractionRepository->createFriendRequest($validatedFriendReq);
-            return response()->json(['message' => 'Friend request sent'], 200);
+            $sendFriendReqRes = $this->userInteractionRepository->createFriendRequest($validatedFriendReq);
+            return response()->json(['message' => $sendFriendReqRes], 200);
+
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 400);
         } catch (\Exception $e) {
@@ -153,9 +161,13 @@ class UserInteractionController extends Controller
                 return response()->json(['message' => 'User does not exist'], 404);
             }
 
-            $this->userInteractionRepository->removeFriend($friendID, auth()->user()->id);
-            return response()->json(['message' => 'Friend Removed'], 200);
+           $removeFriendRes = $this->userInteractionRepository->removeFriend($friendID, auth()->user()->id);
 
+           if($removeFriendRes) {
+                return response()->json(['message' => 'Friend removed'], 200);
+           }else {
+                return response()->json(['message' => 'Friend does not exist'], 404);
+           }
         }catch(\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

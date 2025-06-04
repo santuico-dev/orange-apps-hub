@@ -32,28 +32,33 @@ class UserInteractionRepository implements UserInteractionInterface
 
     public function fetchMyFriends($userID)
     {
-        //friend where the user sent the friend request to
-        $sentFriendIDs = UserInteraction::where('friend_request_from', $userID)
+        $sentFriendships = UserInteraction::where('friend_request_from', $userID)
             ->where('friend_request_status', 'accepted')
-            ->pluck('friend_request_to');
-
-        //friend where the user received the friend request
-        $receivedFriendIDs = UserInteraction::where('friend_request_to', $userID)
-            ->where('friend_request_status', 'accepted')
-            ->pluck('friend_request_from');
-
-        //merging both data
-        $allFriendIDs = $sentFriendIDs->merge($receivedFriendIDs);
-
-        return User::whereIn('id', $allFriendIDs)
+            ->join('users', 'users.id', '=', 'friend_request.friend_request_to')
             ->select(
-                'id as user_id',
-                'user_profile_image',
-                DB::raw("CONCAT(first_name, ' ', last_name) as user_full_name"),
-                'created_at as added_date'
-            )
-            ->limit(5) // temp
+                'users.id as user_id',
+                'users.user_profile_image',
+                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_full_name"),
+                'friend_request.friend_request_created_at as added_date'
+            );
+
+        $receivedFriendships = UserInteraction::where('friend_request_to', $userID)
+            ->where('friend_request_status', 'accepted')
+            ->join('users', 'users.id', '=', 'friend_request.friend_request_from')
+            ->select(
+                'users.id as user_id',
+                'users.user_profile_image',
+                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_full_name"),
+                'friend_request.friend_request_created_at as added_date'
+
+            );
+
+        //merging the results of two queries
+        $allFriends = $sentFriendships->union($receivedFriendships)
+            ->limit(5)  //temp
             ->get();
+
+        return $allFriends;
     }
 
     public function fetchFriendSuggestion($userID)
@@ -81,6 +86,7 @@ class UserInteractionRepository implements UserInteractionInterface
         return User::where('id', '!=', $userID)
             ->whereNotIn('id', $excludedIDs)
             ->select(
+                'id as user_id',
                 'user_profile_image',
                 DB::raw("CONCAT(first_name, ' ', last_name) as user_full_name")
             )
@@ -117,9 +123,10 @@ class UserInteractionRepository implements UserInteractionInterface
             ->get();
     }
 
-    public function createFriendRequest($requestData): ?UserInteraction
+    public function createFriendRequest($requestData)
     {
-        return UserInteraction::create($requestData);
+        UserInteraction::create($requestData);
+        return 'Friend request sent successfully';
     }
 
     public function removeFriend($friendID, $userID)

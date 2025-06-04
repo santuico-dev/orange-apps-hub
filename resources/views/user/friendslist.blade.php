@@ -371,31 +371,44 @@
                 icon: 'question',
                 title: 'Wait!',
                 text: 'Are you sure you want to remove this friend?',
-                showConfirmButton: true
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                cancelButtonText: "No"
             }).then((result) => {
-                $.ajax({
-                    url: `api/removeFriend/${friendID}`,
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
-                        'Accept': 'application/json'
-                    },
-                    success: function(friends) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Removed from friends list.',
-                            showConfirmButton: false
-                        }).then((result) => {
-                            fetchFriends();
-                            fetchFriendSuggestions();
-                        });
-                    },
-                    error: function() {
-                        $('#friendListContainer').html(
-                            '<p class="text-danger">Failed to delete friend.</p>');
-                    }
-                })
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `api/removeFriend/${friendID}`,
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+                            'Accept': 'application/json'
+                        },
+                        success: function(friends) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Removed from friends list.',
+                                showConfirmButton: false
+                            }).then((result) => {
+                                fetchFriends();
+                                fetchFriendSuggestions();
+                            });
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops!',
+                                text: `${xhr.responseJSON.message || 'An error occurred'}`,
+                                timer: 3000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                fetchFriends();
+                                fetchFriendSuggestions();
+                            })
+                        }
+                    })
+                }
             });
 
 

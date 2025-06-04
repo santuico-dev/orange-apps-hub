@@ -11,10 +11,12 @@ class PostRepository implements PostInterface
 
     public function fetchAllPost()
     {
-        return Post::join('users', 'users.id', '=', 'post.user_id')
+        //all post
+        $posts = Post::join('users', 'users.id', '=', 'post.user_id')
             ->select(
                 'post.id',
                 'post.post_content',
+                'post.media_type',
                 'post.post_media_path',
                 'post.post_like_count',
                 'post.post_comment_count',
@@ -25,6 +27,19 @@ class PostRepository implements PostInterface
             )
             ->orderBy('post.created_at', 'desc')
             ->get();
+
+        //getting all the posts that the curr user liked
+        $currUserLikedPostsIDs = DB::table('post_likes')
+            ->where('user_id', auth()->user()->id)
+            ->pluck('post_id')
+            ->toArray();
+
+        //adding the liked field in the posts result
+        foreach ($posts as $post) {
+            $post->liked = in_array($post->id, $currUserLikedPostsIDs);
+        }
+
+        return $posts;
     }
 
     public function fetchPostByUserID($userID): ?Post

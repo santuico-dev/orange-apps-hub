@@ -5,12 +5,11 @@
 @section('page-content')
 
     <div class="d-flex justify-content-center align-items-center min-vh-100">
-        <div class="container-fluid">
+        <div class="container-fluid" data-aos="fade-up">
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-xl-6">
                     <div class="bg-white shadow-lg rounded-4 overflow-hidden">
                         <div class="row g-0">
-
                             <!-- FORM -->
                             <div class="col-md-6 p-5">
                                 <form id="login-form">
