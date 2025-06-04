@@ -25,4 +25,14 @@ class Post extends Model
     {
         return $this->hasMany(PostLike::class);
     }
+
+    public function media()
+    {
+        return $this->hasMany(PostMedia::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

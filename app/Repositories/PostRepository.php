@@ -11,36 +11,41 @@ class PostRepository implements PostInterface
 
     public function fetchAllPost()
     {
-        //all post
-        $posts = Post::join('users', 'users.id', '=', 'post.user_id')
-            ->select(
-                'post.id',
-                'post.post_content',
-                'post.media_type',
-                'post.post_media_path',
-                'post.post_like_count',
-                'post.post_comment_count',
-                'post.post_created_at',
-                'users.id as user_id',
-                DB::raw("CONCAT(users.first_name, ' ', users.last_name) as user_full_name"),
-                'users.user_profile_image as user_profile_image'
-            )
-            ->orderBy('post.created_at', 'desc')
+        //fetch post media and user
+        $posts = Post::with(['media', 'user'])
+            ->orderBy('post_created_at', 'desc')
             ->get();
 
-        //getting all the posts that the curr user liked
-        $currUserLikedPostsIDs = DB::table('post_likes')
+        //id of the post that the curr user liked
+        $likedPostIDs = DB::table('post_likes')
             ->where('user_id', auth()->user()->id)
             ->pluck('post_id')
             ->toArray();
 
-        //adding the liked field in the posts result
-        foreach ($posts as $post) {
-            $post->liked = in_array($post->id, $currUserLikedPostsIDs);
-        }
+        //combined data of the post
+        $allPost = $posts->map(function ($post) use ($likedPostIDs) {
+            return [
+                'id' => $post->id,
+                'post_content' => $post->post_content,
+                'post_like_count' => $post->post_like_count,
+                'post_comment_count' => $post->post_comment_count,
+                'post_created_at' => $post->post_created_at,
+                'liked' => in_array($post->id, $likedPostIDs),
+                'user_id' => $post->user->id,
+                'user_full_name' => $post->user->first_name . ' ' . $post->user->last_name,
+                'user_profile_image' => $post->user->user_profile_image,
+                'media' => $post->media->map(function ($media) {
+                    return [
+                        'media_path' => $media->media_path,
+                        'media_type' => $media->media_type,
+                    ];
+                }),
+            ];
+        });
 
-        return $posts;
+        return $allPost;
     }
+
 
     public function fetchPostByUserID($userID): ?Post
     {

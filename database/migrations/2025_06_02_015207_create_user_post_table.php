@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('post', function (Blueprint $table) {
             $table->id();
-            $table->text('post_content');
-            $table->string('post_media_path');
+            $table->text('post_content')->nullable();
+            $table->string('post_media_path')->nullable();
             $table->enum('media_type', ['image', 'video'])->nullable();
             $table->unsignedBigInteger('post_like_count')->default(0);
             $table->unsignedBigInteger('post_comment_count')->default(0);

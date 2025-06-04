@@ -217,6 +217,13 @@
                 border-top: 1px solid #e9ecef;
             }
 
+            .media-gallery {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                grid-gap: 10px;
+            }
+
+
             body {
                 background-color: #f8f9fa;
             }
@@ -290,7 +297,7 @@
                                 <!-- this will be replaced dynamically with either image or video -->
                                 <div id="mediaPreview"></div>
                                 <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
-                                    onclick="removeImage()">
+                                    onclick="removeAllMedia()">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -304,7 +311,7 @@
                                 <h5 class="text-muted">Upload photos/videos</h5>
                                 <p class="text-muted">or drag and drop</p>
                             </div>
-                            <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;"
+                            <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display: none;"
                                 onchange="handleFileSelect(this)">
                         </div>
                     </div>
@@ -333,7 +340,7 @@
 
         {{-- POST HANDLER --}}
         <script>
-            let selectedFile = null;
+            let selectedFiles = [];
 
             //function to open the post modal
             function openPostModal() {
@@ -349,60 +356,64 @@
             //funtion to handle file selection
             function handleFileSelect(input) {
 
-                //getting the uploaded file
-                const file = input.files[0];
-                if (!file) return;
+                //using Array.from will get all the selected files inside an array
+                const files = Array.from(input.files);
+                if (files.length === 0) return;
 
-                selectedFile = file;
-                const reader = new FileReader();
+                //setting the files to the selected files
+                selectedFiles = files;
 
-                //function that will be trigerred when the file is uploaded
-                reader.onload = function(e) {
+                const previewContainer = document.getElementById('previewContainer');
+                const mediaPreview = document.getElementById('mediaPreview');
 
-                    //getting the preview container & media preview element
-                    const previewContainer = document.getElementById('previewContainer');
-                    const mediaPreview = document.getElementById('mediaPreview');
+                //clearing the media preview
+                mediaPreview.innerHTML = '';
 
-                    mediaPreview.innerHTML = '';
+                //looping all the files
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        let mediaElement;
 
-                    //checking if the uploaded file is an image or video
-                    if (file.type.startsWith('image/')) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = 'Image Preview';
-                        img.className = 'preview-image';
-                        mediaPreview.appendChild(img);
-                    } else if (file.type.startsWith('video/')) {
-                        const video = document.createElement('video');
-                        video.src = e.target.result;
-                        video.controls = true;
-                        video.className = 'preview-image';
-                        mediaPreview.appendChild(video);
-                    } else {
-                        //prompting the user that his/her uploaded file is unsupoorted
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Unsupported file type',
-                            text: 'Please upload an image or video.',
-                            confirmButtonColor: '#ff7f50'
-                        });
-                        return;
-                    }
+                        //check if the file is an image or video
+                        if (file.type.startsWith('image/')) {
+                            mediaElement = document.createElement('img');
+                            mediaElement.src = e.target.result;
+                            mediaElement.alt = 'Image Preview';
+                            mediaElement.className = 'preview-image me-2 mb-2';
+                        } else if (file.type.startsWith('video/')) {
+                            mediaElement = document.createElement('video');
+                            mediaElement.src = e.target.result;
+                            mediaElement.controls = true;
+                            mediaElement.className = 'preview-image me-2 mb-2';
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Unsupported file type',
+                                text: 'Only images and videos are allowed.',
+                                confirmButtonColor: '#ff7f50'
+                            });
+                            return;
+                        }
 
-                    previewContainer.style.display = 'block';
-                    document.getElementById('uploadZone').style.display = 'none';
-                    checkPostButton();
-                };
+                        //adding the file to the media preview so we can see it when uploaded
+                        mediaPreview.appendChild(mediaElement);
+                    };
+                    reader.readAsDataURL(file);
+                });
 
-                reader.readAsDataURL(file);
+                previewContainer.style.display = 'block';
+                document.getElementById('uploadZone').style.display = 'none';
+                checkPostButton();
             }
 
-            //function to remove the uploaded image
-            function removeImage() {
-                selectedFile = null;
+            //function to remove the uploaded files
+            function removeAllMedia() {
+                selectedFiles = [];
                 document.getElementById('previewContainer').style.display = 'none';
                 document.getElementById('uploadZone').style.display = 'block';
                 document.getElementById('fileInput').value = '';
+                document.getElementById('mediaPreview').innerHTML = '';
                 checkPostButton();
             }
 
@@ -411,7 +422,7 @@
                 const textarea = document.getElementById('postTextarea');
                 const submitBtn = document.getElementById('btnPost');
 
-                if (textarea.value.trim() || selectedFile) {
+                if (textarea.value.trim() || selectedFiles) {
                     submitBtn.disabled = false;
                 } else {
                     submitBtn.disabled = true;
@@ -430,11 +441,14 @@
                 const postFormData = new FormData();
                 postFormData.append('post_content', postText);
 
-                if (selectedFile) {
-                    postFormData.append('media', selectedFile);
+                if (selectedFiles) {
+                    //loop through the selected files to append it in the form data and send to BE
+                    selectedFiles.forEach(file => {
+                        postFormData.append(`media[]`, file);
+                    })
                 }
 
-                if (postText || selectedFile) {
+                if (postText || selectedFiles) {
                     $.ajax({
                         url: '/api/createPost',
                         method: 'POST',
@@ -556,17 +570,23 @@
                                             <p>${parseLinks(post.post_content) || ""}</p>
 
                                            <!-- Post Media where it determines if its image or video by using media_type -->
-                                          <div class="d-flex align-items-center justify-content-center">
-                                            ${post.media_type === 'image' && post.post_media_path
-                                                ? `<img src="/storage/${post.post_media_path}" alt="Post Media" class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;" />`
-                                                : post.media_type === 'video' && post.post_media_path
-                                                ? `<video controls class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;">
-                                                                        <source src="/storage/${post.post_media_path}" type="video/mp4">
-                                                                        Your browser does not support the video tag.
-                                                                        </video>`
-                                                : ''
-                                            }
-                                            </div>
+                                          ${post.media.length > 0 ? post.media.map( function (media) {
+                                              return `
+                                                        <div class="media-gallery d-flex align-items-center justify-content-center">
+                                                            <div class="media-item">
+                                                                ${media.media_type === 'image' && media.media_path
+                                                                    ? `<img src="/storage/${media.media_path}" alt="Post Media" class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;" />`
+                                                                    : media.media_type === 'video' && media.media_path
+                                                                    ? `<video controls class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;">
+                                                            <source src="/storage/${media.media_path}" type="video/mp4">
+                                                            Your browser does not support the video tag.
+                                                            </video>`
+                                                                    : ''
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                      `
+                                          }) : ''}
                                         </div>
 
                                          <!-- Like & Comment count -->
@@ -621,8 +641,10 @@
 
             //function to parse links that is included with the post
             function parseLinks(text) {
-                const urlRegex = /(https?:\/\/[^\s]+)/g;
-                return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+                if (text !== null) {
+                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                    return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+                }
             }
 
             //this is just for interval based on how long the post has been created
