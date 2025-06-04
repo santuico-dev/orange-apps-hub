@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->string('gender');
             $table->string('mobile_number')->unique();
+            $table->string('user_profile_image')->default("uploads/posts/Bmn18pvzTvIqFYa2H9SozKmhDsrQy3AbTvcGLFop.jpg");
             $table->string('email')->unique();
             $table->string('password');
             $table->rememberToken();

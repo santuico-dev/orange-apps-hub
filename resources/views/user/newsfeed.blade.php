@@ -284,6 +284,14 @@
                             <img alt="Profile" class="profile-image profile-img me-3">
                             <div>
                                 <h6 class="profile-name mb-0 fw-bold"></h6>
+                                <div class="mt-2">
+                                    <select class="form-select form-select-sm" id="postVisibility"
+                                        style="font-family: Poppins, sans-serif; font-weight: 400;">
+                                        <option value="public" selected>Public</option>
+                                        <option value="friends-only">Friends Only</option>
+                                        <option value="private">Private</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -435,11 +443,13 @@
                 e.preventDefault();
 
                 const textarea = document.getElementById('postTextarea');
+                const postRestriction = document.getElementById('postVisibility');
                 const postText = textarea.value.trim();
 
                 //doing this to avoid Illegal Invocation error since we are directly passing in object of the file
                 const postFormData = new FormData();
                 postFormData.append('post_content', postText);
+                postFormData.append('restriction_type', postRestriction.value);
 
                 if (selectedFiles) {
                     //loop through the selected files to append it in the form data and send to BE
@@ -449,6 +459,7 @@
                 }
 
                 if (postText || selectedFiles) {
+
                     $.ajax({
                         url: '/api/createPost',
                         method: 'POST',
@@ -471,7 +482,7 @@
 
                                 //clear the post input && remove the image once uploaded
                                 textarea.value = '';
-                                removeImage();
+                                removeAllMedia();
 
                                 //close modal once post is submitted
                                 const modal = bootstrap.Modal.getInstance(document.getElementById(
@@ -493,8 +504,6 @@
                         }
                     })
                 }
-
-
             })
 
             //dropzone
@@ -526,9 +535,6 @@
             document.getElementById('postTextarea').addEventListener('input', checkPostButton);
         </script>
 
-        {{-- SESSION CHECKER --}}
-        <script src="{{ asset('js/utils/session.js') }}"></script>
-
         {{-- FETCHING OF POST & OTHER FUNCTIONALITY --}}
         <script>
             $(document).ready(function() {
@@ -558,10 +564,17 @@
                                         <div class="p-3">
                                             <!-- Post Header -->
                                             <div class="d-flex align-items-center mb-3">
-                                                <img src="${post.user_profile_image ? '/storage/' + post.user_profile_image : 'https://via.placeholder.com/40'}" alt="Profile" class="profile-img me-3">
+                                                <img src="${post.user_profile_image ? '/storage/' + post.user_profile_image : ''}" alt="Profile" class="profile-img me-3">
                                                 <div>
                                                     <h6 class="mb-0 fw-bold">${post.user_full_name}</h6>
                                                     <small class="text-muted">${timeAgo(post.post_created_at)}</small>
+                                                    <small class="text-muted">
+                                                        ${post.restriction_type === 'public'
+                                                            ? '<i class="bi bi-globe-americas me-1"></i>'
+                                                            : post.restriction_type === 'friends-only'
+                                                                ? '<i class="bi bi-people-fill me-1"></i>'
+                                                                : '<i class="bi bi-lock-fill me-1"></i>'}
+                                                    </small>
                                                 </div>
                                             </div>
 
@@ -572,20 +585,20 @@
                                            <!-- Post Media where it determines if its image or video by using media_type -->
                                           ${post.media.length > 0 ? post.media.map( function (media) {
                                               return `
-                                                        <div class="media-gallery d-flex align-items-center justify-content-center">
-                                                            <div class="media-item">
-                                                                ${media.media_type === 'image' && media.media_path
-                                                                    ? `<img src="/storage/${media.media_path}" alt="Post Media" class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;" />`
-                                                                    : media.media_type === 'video' && media.media_path
-                                                                    ? `<video controls class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;">
-                                                            <source src="/storage/${media.media_path}" type="video/mp4">
-                                                            Your browser does not support the video tag.
-                                                            </video>`
-                                                                    : ''
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                      `
+                                                <div class="media-gallery d-flex align-items-center justify-content-center">
+                                                    <div class="media-item">
+                                                    ${media.media_type === 'image' && media.media_path
+                                                        ? `<img src="/storage/${media.media_path}" alt="Post Media" class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover; cursor: pointer;" onclick="window.open('/storage/${media.media_path}', '_blank')"/>`
+                                                        : media.media_type === 'video' && media.media_path
+                                                        ? `<video controls class="img-fluid rounded mb-3" style="height: 450px; object-fit: cover;">
+                                                <source src="/storage/${media.media_path}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                                </video>`
+                                                        : ''
+                                                    }
+                                                </div>
+                                            </div>
+                                            `
                                           }) : ''}
                                         </div>
 
@@ -777,7 +790,7 @@
                         fetchComments(postId);
 
                         //incrementing the value of the comment count in UI
-                        commentCount.text(parseInt(commentCount.text) + 1);
+                        // commentCount.text(parseInt(commentCount.text) + 1);
 
                         //clearing the input field
                         input.value = '';
@@ -793,6 +806,10 @@
                 });
             }
         </script>
+
+        {{-- SESSION CHECKER --}}
+        <script src="{{ asset('js/utils/session.js') }}"></script>
+
     </body>
     </div>
 

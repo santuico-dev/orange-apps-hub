@@ -65,6 +65,7 @@ class PostController extends Controller
 
             $validatedPostReq = $request->validate([
                 'post_content' => 'nullable|string',
+                'restriction_type' => "nullable|string",
                 'media' => 'nullable|array',
                 'media.*' => 'file|mimes:jpg,jpeg,png,mp4,mov,avi|max:20480',
             ]);

@@ -299,7 +299,7 @@
                                 <div class="flex-grow-1">
                                     <h6 class="friend-name mb-1">${suggestion.user_full_name}</h6>
                                     <div class="d-flex gap-2">
-                                      <button class="btn-add-friend mt-1" data-name="${suggestion.user_full_name}" style="background: linear-gradient(135deg, #ffa500, #ff7f50); color: #fff; font-weight: 500; font-family: Kanit, sans-serif;">Add Friend</button>
+                                      <button class="btn-add-friend mt-1" data-name="${suggestion.user_full_name}" data-receiver-id="${suggestion.user_id}" style="background: linear-gradient(135deg, #ffa500, #ff7f50); color: #fff; font-weight: 500; font-family: Kanit, sans-serif;">Add Friend</button>
                                     </div>
                                 </div>
                             </div>
@@ -317,6 +317,7 @@
         //jquery for adding friend
         $(document).on('click', '.btn-add-friend', function() {
             const fullname = $(this).data('name');
+            const receiverID = $(this).data('receiver-id');
 
             $.ajax({
                 url: 'api/createFriendRequest',
@@ -326,6 +327,7 @@
                     'Accept': 'application/json'
                 },
                 data: {
+                    receiver_id: receiverID,
                     receiver_full_name: fullname
                 },
                 success: function(suggestions) {
@@ -410,7 +412,6 @@
                     })
                 }
             });
-
 
         });
 

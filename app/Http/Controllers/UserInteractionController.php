@@ -35,15 +35,18 @@ class UserInteractionController extends Controller
         return $this->userInteractionRepository->fetchMyFriends(auth()->user()->id);
     }
 
-    public function fetchUserByName($name) {
+    public function fetchUserByName($name)
+    {
         return $this->userRepository->findUserByName($name);
     }
 
-    public function fetchPendingFriendRequests() {
+    public function fetchPendingFriendRequests()
+    {
         return $this->userInteractionRepository->fetchPendingFriendRequests(auth()->user()->id);
     }
 
-    public function fetchSentPendingFriendRequests() {
+    public function fetchSentPendingFriendRequests()
+    {
         return $this->userInteractionRepository->fetchSentPendingFriendRequests(auth()->user()->id);
     }
 
@@ -73,7 +76,7 @@ class UserInteractionController extends Controller
                 return response()->json(['message' => 'User does not exist'], 404);
             }
 
-            if($isSameUser) {
+            if ($isSameUser) {
                 return response()->json(['message' => 'You cannot send a friend request to yourself'], 400);
             }
             //adding the value of the curr date
@@ -86,7 +89,6 @@ class UserInteractionController extends Controller
             //send req
             $sendFriendReqRes = $this->userInteractionRepository->createFriendRequest($validatedFriendReq);
             return response()->json(['message' => $sendFriendReqRes], 200);
-
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->errors()], 400);
         } catch (\Exception $e) {
@@ -153,22 +155,21 @@ class UserInteractionController extends Controller
         try {
 
             //guards
-            if(!$friendID) {
+            if (!$friendID) {
                 return response()->json(['message' => 'Invalid Friend ID'], 422);
             }
 
-            if(!$this->userRepository->findUserByID($friendID)) {
+            if (!$this->userRepository->findUserByID($friendID)) {
                 return response()->json(['message' => 'User does not exist'], 404);
             }
 
-           $removeFriendRes = $this->userInteractionRepository->removeFriend($friendID, auth()->user()->id);
+            $removeFriendRes = $this->userInteractionRepository->removeFriend($friendID, auth()->user()->id);
 
-           if($removeFriendRes) {
-                return response()->json(['message' => 'Friend removed'], 200);
-           }else {
+            if (!$removeFriendRes) {
                 return response()->json(['message' => 'Friend does not exist'], 404);
-           }
-        }catch(\Exception $e) {
+            }
+            return response()->json(['message' => $removeFriendRes], 200);
+        } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }

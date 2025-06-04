@@ -62,16 +62,20 @@ class AuthController extends Controller
                     'last_name' => 'required|string|max:50',
                     'mobile_number' => 'required|digits:11|regex:/^09\d{9}$/',
                     'birth_date' => 'required|date|before:today',
-                    'email' => 'required|email',
+                    'email' => [
+                        'required',
+                        'email',
+                        'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'
+                    ],
                     'gender' => 'required|in:male,female',
                     'password' => [
                         'required',
                         'string',
-                        'min:8',              //minimum 8 characters
-                        'regex:/[A-Z]/',      //must contain atleast one uppercase letter
-                        'regex:/[a-z]/',      //must contain atleast one lowercase letter
-                        'regex:/[0-9]/',      //must contain atleast one digit
-                        'regex:/[@$!%*#?&]/', //must contain a special character
+                        'min:8',
+                        'regex:/[A-Z]/',
+                        'regex:/[a-z]/',
+                        'regex:/[0-9]/',
+                        'regex:/[@$!%*#?&]/',
                     ],
                 ],
                 [
@@ -87,6 +91,7 @@ class AuthController extends Controller
                     'birth_date.before' => 'Birthdate must be in the past',
                     'email.required' => 'Email is required',
                     'email.email' => 'Email must be a valid email address',
+                    'email.regex' => 'Invaid Email Format',
                     'password.required' => 'Password is required',
                     'gender.required' => 'Gender is required',
                     'password.min' => 'Password must be at least 8 characters',

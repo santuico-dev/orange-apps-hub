@@ -131,7 +131,6 @@ class UserInteractionRepository implements UserInteractionInterface
 
     public function removeFriend($friendID, $userID)
     {
-
         //friend request sent by the curr user
         UserInteraction::where('friend_request_from', $userID)
             ->where('friend_request_to', $friendID)
@@ -143,6 +142,9 @@ class UserInteractionRepository implements UserInteractionInterface
             ->where('friend_request_to', $userID)
             ->where('friend_request_status', 'accepted')
             ->delete();
+
+        return 'Friend removed successfully';
+
     }
 
     public function acceptFriendRequest($requestData)
